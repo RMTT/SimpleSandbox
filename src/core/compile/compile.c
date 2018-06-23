@@ -11,7 +11,7 @@ void init_compile_seccomp_filter(scmp_filter_ctx *ctx) {
 
 
 int compile(char *file, char *output_file, char *compile_command, struct compile_config *config) {
-    scmp_filter_ctx ctx;
-    init_compile_seccomp_filter(*ctx);
+    scmp_filter_ctx *ctx = NULL;
+    init_compile_seccomp_filter(ctx);
 }
 
