@@ -17,7 +17,7 @@
 #define LOG_LEVEL_INFO 3
 #define LOG_LEVEL_DEBUG 4
 
-const char const *LOG_LEVEL[] = {"FATAL_ERROR", "ERROR", "WARNING", "INFO", "DEBUG"};
+extern const char const *LOG_LEVEL[];
 
 /**
  * write log
@@ -28,20 +28,22 @@ const char const *LOG_LEVEL[] = {"FATAL_ERROR", "ERROR", "WARNING", "INFO", "DEB
  * @param write_mod the type of write to file */
 extern void log_write(int level, char *source_file, char *log_file, char *message, char *write_mod);
 
-
-#define LOG_DEBUG(source_file, log_file, message, write_mod)\
-log_write(LOG_LEVEL_DEBUG, source_file,log_file,message, write_mod)
-
-#define LOG_INFO(source_file, log_file, message, write_mod)\
-log_write(LOG_LEVEL_INFO, source_file,log_file,message, write_mod)
-
-#define LOG_WARNING(source_file, log_file, message, write_mod)\
+#define log(source_file, log_file, message, write_mod)\
 log_write(LOG_LEVEL_WARNING, source_file,log_file,message, write_mod)
 
-#define LOG_ERROR(source_file, log_file, message, write_mod)\
+#define log_debug(source_file, log_file, message, write_mod)\
+log_write(LOG_LEVEL_DEBUG, source_file,log_file,message, write_mod)
+
+#define log_info(source_file, log_file, message, write_mod)\
+log_write(LOG_LEVEL_INFO, source_file,log_file,message, write_mod)
+
+#define log_warning(source_file, log_file, message, write_mod)\
+log_write(LOG_LEVEL_WARNING, source_file,log_file,message, write_mod)
+
+#define log_error(source_file, log_file, message, write_mod)\
 log_write(LOG_LEVEL_ERROR, source_file,log_file,message, write_mod)
 
-#define LOG_FATAL(source_file, log_file, message, write_mod)\
+#define log_fatal(source_file, log_file, message, write_mod)\
 log_write(LOG_LEVEL_FATAL, source_file,log_file,message, write_mod)
 
 #endif //IMCODER_JUDGER_LOGGER_H

@@ -9,6 +9,9 @@
 #include <fcntl.h>
 #include <memory.h>
 
+
+const char const *LOG_LEVEL[] = {"FATAL_ERROR", "ERROR", "WARNING", "INFO", "DEBUG"};
+
 void log_write(int level, char *source_file, char *log_file, char *message, char *write_mod) {
     FILE *logfile = fopen(log_file, write_mod);
     if (logfile == NULL) {
@@ -21,7 +24,7 @@ void log_write(int level, char *source_file, char *log_file, char *message, char
     time(&now);
     strftime(datetime, 99, "%Y-%m-%d %H:%M:%S", localtime(&now));
 
-    char *buffer[MAX_LOG_SIZE];
+    char buffer[MAX_LOG_SIZE];
     int fd = fileno(logfile);
 
     int log_size = snprintf(buffer, MAX_LOG_SIZE, "[%s %s]: %s on %s\n", LOG_LEVEL[level], datetime, source_file,
