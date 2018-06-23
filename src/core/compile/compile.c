@@ -5,7 +5,7 @@
 #include <seccomp.h>
 #include "compile.h"
 #include <stdlib.h>
-#include <zconf.h>
+#include <unistd.h>
 #include "error.h"
 #include "logger.h"
 #include <stdio.h>
