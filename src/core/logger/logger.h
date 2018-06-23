@@ -26,7 +26,8 @@ extern const char const *LOG_LEVEL[];
  * @param log_file the log file
  * @param message the error message
  * @param write_mod the type of write to file */
-extern void log_write(int level, char *source_file, char *log_file, char *message, char *write_mod);
+extern void
+log_write(int level, const char *source_file, const char *log_file, const char *message, const char *write_mod);
 
 #define log(source_file, log_file, message, write_mod)\
 log_write(LOG_LEVEL_WARNING, source_file,log_file,message, write_mod)

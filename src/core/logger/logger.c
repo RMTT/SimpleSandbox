@@ -12,7 +12,7 @@
 
 const char const *LOG_LEVEL[] = {"FATAL_ERROR", "ERROR", "WARNING", "INFO", "DEBUG"};
 
-void log_write(int level, char *source_file, char *log_file, char *message, char *write_mod) {
+void log_write(int level, const char *source_file, const char *log_file, const char *message, const char *write_mod) {
     FILE *logfile = fopen(log_file, write_mod);
     if (logfile == NULL) {
         fprintf(stderr, "can not open log file %s", log_file);
@@ -27,8 +27,8 @@ void log_write(int level, char *source_file, char *log_file, char *message, char
     char buffer[MAX_LOG_SIZE];
     int fd = fileno(logfile);
 
-    int log_size = snprintf(buffer, MAX_LOG_SIZE, "[%s %s]: %s on %s\n", LOG_LEVEL[level], datetime, source_file,
-                            message);
+    int log_size = snprintf(buffer, MAX_LOG_SIZE, "[%s %s]: %s on %s\n", LOG_LEVEL[level], datetime, message,
+                            source_file);
 
     struct flock lock;
     lock.l_type = F_WRLCK;
