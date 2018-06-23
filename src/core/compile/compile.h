@@ -8,23 +8,11 @@
 #include <seccomp.h>
 
 /**
- * the common config of compile
- * @param uid the user who execute the compile command
- * @param gid the group if of the user,maybe NULL
- * @param log_file the log file*/
-struct compile_config {
-    int uid;
-    int gid;
-    char *log_file;;
-};
-
-
-/**
  * compile the target file
  * @param compiler_path the path of the compiler,should be a binary executable file
  * @param config see above compile_config
  * @param argv compile argument */
-extern void compile(const char *compiler_path, struct compile_config *config, char *argv[], char *envp[]);
+extern void compile(const char *compiler_path, const char *log_file, char *argv[], int *result);
 
 
 /**

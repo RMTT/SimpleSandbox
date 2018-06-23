@@ -11,40 +11,52 @@
 #include <stdio.h>
 #include <wait.h>
 #include <signal.h>
+#include <memory.h>
+#include "compile_config.h"
 
 void init_compile_seccomp_filter(scmp_filter_ctx *ctx) {
     *ctx = seccomp_init(SCMP_ACT_ALLOW);
 }
 
 
-void compile(const char *compiler_path, struct compile_config *config, char *argv[], char *envp[]) {
+void compile(const char *compiler_path, const char *log_file, char *argv[], int *result) {
     scmp_filter_ctx ctx = NULL;
     init_compile_seccomp_filter(&ctx);
 
     if (ctx == NULL)
-        exit_with_error(1, LOG_LEVEL_FATAL, "seccomp set failed", config->log_file, "compile.c");
+        exit_with_error(1, LOG_LEVEL_FATAL, "seccomp set failed", log_file, "compile.c");
 
     seccomp_load(ctx);
     seccomp_release(ctx);
-    setuid((__uid_t) config->uid);
-    setgid((__gid_t) config->gid);
 
     pid_t pid = fork();
 
     if (pid == -1)
-        exit_with_error(1, LOG_LEVEL_FATAL, "child process create failed", config->log_file, "compile.c");
+        exit_with_error(1, LOG_LEVEL_FATAL, "child process create failed", log_file, "compile.c");
     else if (pid == 0) {
-        int rs = execve(compiler_path, argv, envp);
-        printf("%d\n", rs);
+        char *argn[] = {compiler_path};
+        int v_index = 0;
+        while (argv[v_index] != NULL) {
+            argn[v_index + 1] = argv[v_index];
+            v_index++;
+        }
+        argn[v_index + 1] = NULL;
+        int rs = execvp(compiler_path, argn);
         exit(rs);
     } else {
         int status;
         if (wait4(pid, &status, WSTOPPED, NULL) == -1) {
             int rs = kill(pid, SIGKILL);
             if (rs != 0)
-                exit_with_error(1, LOG_LEVEL_FATAL, "kill process failed", config->log_file,
+                exit_with_error(1, LOG_LEVEL_FATAL, "kill process failed", log_file,
                                 "compile.c");
         }
+
+        if (status != 0) {
+            *result = -1;
+            exit_with_error(1, LOG_LEVEL_ERROR, "compile error", log_file, "compile.c");
+        } else
+            *result = 0;
     }
 }
 
