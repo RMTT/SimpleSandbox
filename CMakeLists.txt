@@ -5,6 +5,9 @@ project(imcoder-judger)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/lib)
 
+# some system may can find seccomp.h
+include_directories(/usr/include/linux)
+
 include_directories(src/core/logger)
 include_directories(src/core/compile)
 include_directories(src/core/execute)
