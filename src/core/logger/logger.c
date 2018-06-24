@@ -2,7 +2,7 @@
 // Created by mt on 6/22/18.
 //
 
-#include "logger.h";
+#include "logger.h"
 #include <time.h>
 #include <stdio.h>
 #include <unistd.h>

@@ -47,13 +47,18 @@ struct execute_result {
 /**
  * initialize the execute seccomp filter
  * @param ctx the scmp_filter_ctx should be initialized
- * @param log_file the log file*/
-extern void init_execute_seccomp_filter(scmp_filter_ctx *ctx, const char *log_file);
+ * @param log_file the log file
+ * @return if add filter success,will return 0,otherwise return -1*/
+extern int init_execute_seccomp_filter(scmp_filter_ctx *ctx, const char *log_file);
 
 /**
  * this function will execute the program that configured in the config,and store the resources usage to the result
  * @param config execute config,see above struct execute_config
  * @param result store the runtime resources usage*/
 extern void execute(struct execute_config *config, struct execute_result *result);
+
+
+#define EXIT_WITH_FATAL_ERROR(code)\
+exit_with_error(code, LOG_LEVEL_FATAL, "add seccomp filter faild", config->log_path, "execute.c");
 
 #endif //IMCODER_JUDGER_EXECUTE_H

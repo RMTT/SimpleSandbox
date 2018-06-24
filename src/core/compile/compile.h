@@ -16,8 +16,9 @@ extern void init_compile_seccomp_filter(scmp_filter_ctx *ctx);
 /**
  * compile the target file
  * @param compiler_path the path of the compiler,should be a binary executable file
- * @param config see above compile_config
- * @param argv compile argument */
+ * @param log_file the path of log file
+ * @param argv compile argument
+ * @param result store the compile result*/
 extern void compile(const char *compiler_path, const char *log_file, char *argv[], int *result);
 
 #endif //IMCODER_JUDGER_COMPILE_H
