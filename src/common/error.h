@@ -13,4 +13,10 @@
  * @param source_file the file that occur error*/
 extern void exit_with_error(int code, int level, char *message, char *log_file, char *source_file);
 
+#define ERROR_KILL 1
+#define ERROR_COMPILE 2
+#define ERROR_FORK 3
+#define ERROR_SECCOMP_INIT 4
+#define ERROR_SECCOMP_RULE 5
+
 #endif //IMCODER_JUDGER_ERROR_H

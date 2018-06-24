@@ -24,7 +24,7 @@ void compile(const char *compiler_path, const char *log_file, char *argv[], int 
     init_compile_seccomp_filter(&ctx);
 
     if (ctx == NULL)
-        exit_with_error(1, LOG_LEVEL_FATAL, "seccomp set failed", log_file, "compile.c");
+        exit_with_error(ERROR_SECCOMP_INIT, LOG_LEVEL_FATAL, "seccomp set failed", log_file, "compile.c");
 
     seccomp_load(ctx);
     seccomp_release(ctx);
@@ -32,7 +32,7 @@ void compile(const char *compiler_path, const char *log_file, char *argv[], int 
     pid_t pid = fork();
 
     if (pid == -1)
-        exit_with_error(1, LOG_LEVEL_FATAL, "child process create failed", log_file, "compile.c");
+        exit_with_error(ERROR_FORK, LOG_LEVEL_FATAL, "child process create failed", log_file, "compile.c");
     else if (pid == 0) {
         char *argn[] = {compiler_path};
         int v_index = 0;
@@ -48,13 +48,13 @@ void compile(const char *compiler_path, const char *log_file, char *argv[], int 
         if (wait4(pid, &status, WSTOPPED, NULL) == -1) {
             int rs = kill(pid, SIGKILL);
             if (rs != 0)
-                exit_with_error(1, LOG_LEVEL_FATAL, "kill process failed", log_file,
+                exit_with_error(ERROR_KILL, LOG_LEVEL_FATAL, "kill process failed", log_file,
                                 "compile.c");
         }
 
         if (status != 0) {
             *result = -1;
-            exit_with_error(1, LOG_LEVEL_ERROR, "compile error", log_file, "compile.c");
+            exit_with_error(ERROR_COMPILE, LOG_LEVEL_ERROR, "compile error", log_file, "compile.c");
         } else
             *result = 0;
     }

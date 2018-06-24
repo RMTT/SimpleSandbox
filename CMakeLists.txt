@@ -7,6 +7,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/lib)
 
 include_directories(src/core/logger)
 include_directories(src/core/compile)
+include_directories(src/core/execute)
 include_directories(src/common)
 add_subdirectory(src)
 
