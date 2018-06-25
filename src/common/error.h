@@ -18,5 +18,12 @@ extern void exit_with_error(int code, int level, char *message, char *log_file, 
 #define ERROR_FORK 3
 #define ERROR_SECCOMP_INIT 4
 #define ERROR_SECCOMP_RULE 5
+#define ERROR_SECCOMP_LOAD 6
+#define ERROR_SET_UID 7
+#define ERROR_SET_GID 8
+#define ERROR_SET_RLIMIT 9
+#define ERROR_FILE_OPEN  10
+#define ERROR_FILE_DUP2 11
+#define ERROR_NOT_ROOT 12
 
 #endif //IMCODER_JUDGER_ERROR_H
