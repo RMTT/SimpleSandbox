@@ -12,7 +12,6 @@
 #include <wait.h>
 #include <signal.h>
 #include <memory.h>
-#include "compile_config.h"
 
 void init_compile_seccomp_filter(scmp_filter_ctx *ctx) {
     *ctx = seccomp_init(SCMP_ACT_ALLOW);
@@ -37,7 +36,7 @@ void compile(const char *compiler_path, const char *log_file, char *argv[], int 
         exit_with_error(ERROR_FORK, LOG_LEVEL_FATAL, "child process create failed", log_file, "compile.c");
     else if (pid == 0) {
         execvp(compiler_path, argv);
-        exit(EXIT_FAILURE);
+        exit(SUCCESS_COMPLETE);
     } else {
         int status;
         if (wait4(pid, &status, WSTOPPED, NULL) == -1) {
@@ -47,11 +46,17 @@ void compile(const char *compiler_path, const char *log_file, char *argv[], int 
                                 "compile.c");
         }
 
-        if (status != 0) {
+        int child_exit_statu = WIFEXITED(status);
+
+        if (child_exit_statu) {
+            if (status != 0) {
+                *result = -1;
+                log_write(LOG_LEVEL_ERROR, "compile.c", log_file, "compile error", "a");
+            } else
+                *result = 0;
+        } else {
             *result = -1;
-            log_write(LOG_LEVEL_ERROR, "compile.c", log_file, "compile error", "a");
-        } else
-            *result = 0;
+        }
     }
 }
 

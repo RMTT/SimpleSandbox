@@ -13,6 +13,7 @@
  * @param source_file the file that occur error*/
 extern void exit_with_error(int code, int level, char *message, char *log_file, char *source_file);
 
+#define SUCCESS_COMPLETE 0
 #define ERROR_KILL 1
 #define ERROR_COMPILE 2
 #define ERROR_FORK 3

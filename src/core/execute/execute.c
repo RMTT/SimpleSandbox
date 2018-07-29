@@ -173,8 +173,5 @@ void execute(struct execute_config *config, char *argv[], char *envp[], struct e
             kill(child, SIGKILL);
             EXIT_WITH_FATAL_ERROR(ERROR_KILL, "can not get the result of child process and can not kill it");
         }
-
-        if (status != 0)
-            result->signal = WTERMSIG(status);
     }
 }
