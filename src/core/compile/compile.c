@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <wait.h>
 #include <signal.h>
+#include "logger.h"
 #include <memory.h>
 
 void init_compile_seccomp_filter(scmp_filter_ctx *ctx) {
@@ -18,44 +19,54 @@ void init_compile_seccomp_filter(scmp_filter_ctx *ctx) {
 }
 
 
-void compile(const char *compiler_path, const char *log_file, char *argv[], int *result) {
-    scmp_filter_ctx ctx = NULL;
+void compile(const struct compile_config *config, struct compile_result *result) {
+    scmp_filter_ctx ctx = malloc(sizeof(int));
     init_compile_seccomp_filter(&ctx);
 
-    if (ctx == NULL)
-        exit_with_error(ERROR_SECCOMP_INIT, LOG_LEVEL_FATAL, "seccomp set failed", log_file, "compile.c");
+    // TODO solve invalid next size
+    if (ctx == NULL) {
+        log_error("compile.c", config->log_file, "seccomp set failed", "a");
+        result->status = false;
+        return;
+    }
 
-    if (seccomp_load(ctx) != 0)
-        exit_with_error(ERROR_SECCOMP_INIT, LOG_LEVEL_FATAL, "load seccomp failed", log_file, "compile.c");
+    if (seccomp_load(ctx) != 0) {
+        log_error("compile.c", config->log_file, "load seccomp failed", "a");
+        result->status = false;
+        return;
+    }
 
     seccomp_release(ctx);
 
     pid_t pid = fork();
 
-    if (pid == -1)
-        exit_with_error(ERROR_FORK, LOG_LEVEL_FATAL, "child process create failed", log_file, "compile.c");
-    else if (pid == 0) {
-        execvp(compiler_path, argv);
+    if (pid == -1) {
+        log_error("compile.c", config->log_file, "child process create failed", "a");
+        result->status = false;
+        return;
+    } else if (pid == 0) {
+        execvp(config->compiler_path, config->argv);
         exit(SUCCESS_COMPLETE);
     } else {
         int status;
         if (wait4(pid, &status, WSTOPPED, NULL) == -1) {
             int rs = kill(pid, SIGKILL);
-            if (rs != 0)
-                exit_with_error(ERROR_KILL, LOG_LEVEL_FATAL, "kill process failed", log_file,
-                                "compile.c");
+            if (rs != 0) {
+                log_error("compile.c", config->log_file, "compile thread have some error,but can not kill it", "a");
+                result->status = false;
+                return;
+            }
         }
 
-        int child_exit_statu = WIFEXITED(status);
+        int child_exit_status = WIFEXITED(status);
 
-        if (child_exit_statu) {
-            if (status != 0) {
-                *result = -1;
-                log_write(LOG_LEVEL_ERROR, "compile.c", log_file, "compile error", "a");
-            } else
-                *result = 0;
+        if (child_exit_status) {
+            int child_return_status = WEXITSTATUS(status);
+            if (child_return_status == 0) {
+                result->status = true;
+            }
         } else {
-            *result = -1;
+            result->status = false;
         }
     }
 }
