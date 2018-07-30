@@ -8,6 +8,8 @@
 #include <seccomp.h>
 #include <stdbool.h>
 
+#define MAX_COMPILE_ARGS 256
+
 /**
  * this function will set the common filter to compile environment
  * @param ctx the filter context of compile environment */
@@ -27,11 +29,13 @@ struct compile_result {
  * this struct used to config the compile environment
  * @param compiler_path the path of compiler
  * @param log_file the path of log file
+ * @param tmp_file the path of tmp file,tmp file used to save the output of compiler
  * @param argv the arguments of compile*/
 struct compile_config {
     char *compiler_path;
     char *log_file;
-    char *argv[];
+    char *tmp_file;
+    char *argv[MAX_COMPILE_ARGS];
 };
 
 /**
@@ -40,7 +44,6 @@ struct compile_config {
  * @param log_file the path of log file
  * @param argv compile argument
  * @param result store the compile result*/
-extern void
-compile(const struct compile_config *config, struct compile_result *result);
+extern void compile(const struct compile_config *config, struct compile_result *result);
 
 #endif //IMCODER_JUDGER_COMPILE_H
