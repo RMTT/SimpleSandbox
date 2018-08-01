@@ -27,11 +27,13 @@ struct compile_result {
 
 /**
  * this struct used to config the compile environment
+ * @param uid the uid of user that compile source file
  * @param compiler_path the path of compiler
  * @param log_file the path of log file
  * @param tmp_file the path of tmp file,tmp file used to save the output of compiler
  * @param argv the arguments of compile*/
 struct compile_config {
+    int uid;
     char *compiler_path;
     char *log_file;
     char *tmp_file;
