@@ -21,7 +21,7 @@ extern void init_compile_seccomp_filter(scmp_filter_ctx *ctx);
  * @param status_code if true,represent the compile successful complete,otherwise,is false
  * @param message if compile failed,the message will save the error message*/
 struct compile_result {
-    bool status;
+    int status;
     char *message;
 };
 
@@ -33,7 +33,7 @@ struct compile_result {
  * @param tmp_file the path of tmp file,tmp file used to save the output of compiler
  * @param argv the arguments of compile*/
 struct compile_config {
-    int uid;
+    __uid_t uid;
     char *compiler_path;
     char *log_file;
     char *tmp_file;
@@ -47,5 +47,8 @@ struct compile_config {
  * @param argv compile argument
  * @param result store the compile result*/
 extern void compile(const struct compile_config *config, struct compile_result *result);
+
+#define SUCCESS_COMPILE 100
+#define FAIL_COMPILE 101
 
 #endif //IMCODER_JUDGER_COMPILE_H

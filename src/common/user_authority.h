@@ -7,6 +7,6 @@
 
 /**
  * */
-extern short __require_root_authority();
+extern int __require_root_authority();
 
 #endif //IMCODER_JUDGER_USER_AUTHORITY_H

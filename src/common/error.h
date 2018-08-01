@@ -14,7 +14,8 @@
 extern void exit_with_error(int code, int level, char *message, char *log_file, char *source_file);
 
 #define SUCCESS_COMPLETE 0
-#define ERROR_KILL 1
+
+#define ERROR_KILL_PROCESS 1
 #define ERROR_COMPILE 2
 #define ERROR_FORK 3
 #define ERROR_SECCOMP_INIT 4
@@ -26,5 +27,7 @@ extern void exit_with_error(int code, int level, char *message, char *log_file, 
 #define ERROR_FILE_OPEN  10
 #define ERROR_FILE_DUP2 11
 #define ERROR_NOT_ROOT 12
+#define ERROR_CREATE_PROCESS 13
+
 
 #endif //IMCODER_JUDGER_ERROR_H

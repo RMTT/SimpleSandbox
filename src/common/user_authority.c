@@ -6,10 +6,10 @@
 #include <unistd.h>
 #include "user_authority.h"
 
-short __user_root_authority() {
+int __require_root_authority() {
     int id = getuid();
 
     if (id != 0)
-        return 1;
+        return -1;
     return 0;
 }
