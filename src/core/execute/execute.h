@@ -8,6 +8,13 @@
 #include <seccomp.h>
 #include "error.h"
 
+
+#define MAX_ARG_NUM 256
+#define MAX_ENV_NUM 256
+
+#define SUCCESS_EXECUTE 201
+#define FAIL_EXECUTE 202
+
 /**
  * the struct used to describe execute config
  * if the argument is zero,means unlimit it
@@ -22,8 +29,8 @@
  * @param log_path the log file path
  */
 struct execute_config {
-    uid_t uid;
-    gid_t gid;
+    __uid_t uid;
+    __gid_t gid;
     int max_cpu_time;
     long max_memory;
     long max_stack;
@@ -33,6 +40,8 @@ struct execute_config {
     char *input_path;
     char *output_path;
     char *log_path;
+    char *argv[MAX_ARG_NUM];
+    char *envp[MAX_ENV_NUM];
 };
 
 #define UNLIMIT 0
@@ -41,13 +50,11 @@ struct execute_config {
  * the struct to describe the execute result
  * @param cpu_time the time that the program used
  * @param memory the memory that the program used
- * @param signal
  * @param exit_code*/
 struct execute_result {
+    int status;
     int cpu_time;
     int memory;
-    int signal;
-    int exit_code;
 };
 
 /**
@@ -62,7 +69,7 @@ extern int init_execute_seccomp_filter(scmp_filter_ctx *ctx);
  * @param argv the arguments when execute the program
  * @param envp the environment variable
  * @param result store the runtime resources usage */
-extern void execute(struct execute_config *config, char *argv[], char *envp[], struct execute_result *result);
+extern void execute(struct execute_config *config, struct execute_result *result);
 
 
 /**
@@ -70,11 +77,8 @@ extern void execute(struct execute_config *config, char *argv[], char *envp[], s
  * @param result the struct result will be initialized*/
 extern void init_result(struct execute_result *result);
 
-#define EXIT_WITH_FATAL_ERROR_CHILD(code, message)\
-exit_with_error(code, LOG_LEVEL_FATAL, message, config->log_path, "execute.c");
-
 #define EXIT_WITH_FATAL_ERROR(code, message)\
-result->exit_code = 1;\
+result->status = 1;\
 log_write(ERROR_SECCOMP_RULE, "execute.c", config->log_path, message, "a");\
 return;
 

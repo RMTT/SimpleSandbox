@@ -74,7 +74,6 @@ void compile(const struct compile_config *config, struct compile_result *result)
                 log_error("compile.c", config->log_file, "compile thread have some error,but can not kill it", "a");
                 result->status = ERROR_KILL_PROCESS;
                 result->message = "compile thread have some error,but can not kill it";
-                return;
             }
         }
 
