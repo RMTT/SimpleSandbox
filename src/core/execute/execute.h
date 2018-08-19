@@ -14,6 +14,10 @@
 
 #define SUCCESS_EXECUTE 201
 #define FAIL_EXECUTE 202
+#define EXCEED_MEMORY_LIMIT 203
+#define EXCEED_CPU_TIME_LIMIT 204
+#define EXCEED_OUTPUT_SIZE_LIMIT 205
+#define SYSTEM_ERROR 206
 
 /**
  * the struct used to describe execute config
@@ -53,8 +57,10 @@ struct execute_config {
  * @param exit_code*/
 struct execute_result {
     int status;
-    int cpu_time;
-    int memory;
+    int signal;
+    long int used_time;
+    long int memory;
+    char *message;
 };
 
 /**
@@ -69,7 +75,7 @@ extern int init_execute_seccomp_filter(scmp_filter_ctx *ctx);
  * @param argv the arguments when execute the program
  * @param envp the environment variable
  * @param result store the runtime resources usage */
-extern void execute(struct execute_config *config, struct execute_result *result);
+extern void execute(const struct execute_config *config, struct execute_result *result);
 
 
 /**
@@ -77,9 +83,7 @@ extern void execute(struct execute_config *config, struct execute_result *result
  * @param result the struct result will be initialized*/
 extern void init_result(struct execute_result *result);
 
-#define EXIT_WITH_FATAL_ERROR(code, message)\
-result->status = 1;\
-log_write(ERROR_SECCOMP_RULE, "execute.c", config->log_path, message, "a");\
-return;
+#define EXIT_WITH_FATAL_ERROR(code, level, message)\
+exit_with_error(code,level,message, config->log_path,"execute.c");
 
 #endif //IMCODER_JUDGER_EXECUTE_H

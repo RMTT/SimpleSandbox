@@ -81,7 +81,7 @@ void compile(const struct compile_config *config, struct compile_result *result)
 
         if (child_exit_status) {
             int child_return_status = WEXITSTATUS(status);
-            if (child_return_status == 0) {
+            if (child_return_status == SUCCESS_COMPLETE) {
                 result->status = SUCCESS_COMPILE;
                 result->message = "compile successful";
             } else {
@@ -90,7 +90,7 @@ void compile(const struct compile_config *config, struct compile_result *result)
             }
         } else {
             result->status = FAIL_COMPILE;
-            result->message = "system error";
+            result->message = "compile failed";
         }
     }
 }
