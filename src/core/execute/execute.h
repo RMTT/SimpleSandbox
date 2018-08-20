@@ -18,6 +18,7 @@
 #define EXCEED_CPU_TIME_LIMIT 204
 #define EXCEED_OUTPUT_SIZE_LIMIT 205
 #define SYSTEM_ERROR 206
+#define RUNTIME_ERROR 207
 
 /**
  * the struct used to describe execute config
@@ -59,7 +60,7 @@ struct execute_result {
     int status;
     int signal;
     long int used_time;
-    long int memory;
+    long int used_memory;
     char *message;
 };
 
@@ -83,7 +84,8 @@ extern void execute(const struct execute_config *config, struct execute_result *
  * @param result the struct result will be initialized*/
 extern void init_result(struct execute_result *result);
 
-#define EXIT_WITH_FATAL_ERROR(code, level, message)\
-exit_with_error(code,level,message, config->log_path,"execute.c");
+#define EXIT_WITH_FATAL_ERROR(level, message)\
+log_write(level, "execute.c", config->log_path, message, "a");\
+raise(SIGUSR1);\
 
 #endif //IMCODER_JUDGER_EXECUTE_H

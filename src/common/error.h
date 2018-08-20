@@ -15,19 +15,23 @@ extern void exit_with_error(int code, int level, char *message, char *log_file, 
 
 #define SUCCESS_COMPLETE 0
 
-#define ERROR_KILL_PROCESS  1314 + 1
-#define ERROR_COMPILE 1314 + 2
-#define ERROR_FORK 1314 + 3
-#define ERROR_SECCOMP_INIT 1314 + 4
-#define ERROR_SECCOMP_RULE 1314 + 5
-#define ERROR_SECCOMP_LOAD 1314 + 6
-#define ERROR_SET_UID 1314 + 7
-#define ERROR_SET_GID 1314 + 8
-#define ERROR_SET_RLIMIT 1314 + 9
-#define ERROR_FILE_OPEN  1314 + 10
-#define ERROR_FILE_DUP2 1314 + 11
-#define ERROR_NOT_ROOT 1314 + 12
-#define ERROR_CREATE_PROCESS 1314 + 13
+#define ERROR_KILL_PROCESS  1
+#define ERROR_COMPILE 2
+#define ERROR_FORK 3
+#define ERROR_SECCOMP_INIT 4
+#define ERROR_SECCOMP_RULE 5
+#define ERROR_SECCOMP_LOAD 6
+#define ERROR_SET_UID 7
+#define ERROR_SET_GID 8
+#define ERROR_SET_RLIMIT 9
+#define ERROR_FILE_OPEN  10
+#define ERROR_FILE_DUP2 11
+#define ERROR_NOT_ROOT 12
+#define ERROR_CREATE_PROCESS 13
+
+
+#define SYSTEM_ERROR_SIGNAL SIGUSR1
+#define SUCCESS_PROCEED_SIGNAL SIGUSR2
 
 
 #endif //IMCODER_JUDGER_ERROR_H

@@ -103,7 +103,7 @@ void execute(const struct execute_config *config, struct execute_result *result)
             rl.rlim_cur = rl.rlim_max = (rlim_t) config->max_stack;
 
             if (setrlimit(RLIMIT_STACK, &rl) != 0) {
-                EXIT_WITH_FATAL_ERROR(ERROR_SET_RLIMIT, LOG_LEVEL_FATAL, "limit the stack size failed");
+                EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "limit the stack size failed");
             }
         }
 
@@ -112,7 +112,7 @@ void execute(const struct execute_config *config, struct execute_result *result)
             struct rlimit rl;
             rl.rlim_cur = rl.rlim_max = (rlim_t) config->max_cpu_time;
             if (setrlimit(RLIMIT_CPU, &rl) != 0) {
-                EXIT_WITH_FATAL_ERROR(ERROR_SET_RLIMIT, LOG_LEVEL_FATAL, "limit the cpu time failed");
+                EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "limit the cpu time failed");
             }
         }
 
@@ -121,7 +121,7 @@ void execute(const struct execute_config *config, struct execute_result *result)
             struct rlimit rl;
             rl.rlim_cur = rl.rlim_max = (rlim_t) config->max_memory;
             if (setrlimit(RLIMIT_AS, &rl) != 0) {
-                EXIT_WITH_FATAL_ERROR(ERROR_SET_RLIMIT, LOG_LEVEL_FATAL, "limit the memory failed");
+                EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "limit the memory failed");
             }
         }
 
@@ -130,7 +130,7 @@ void execute(const struct execute_config *config, struct execute_result *result)
             struct rlimit rl;
             rl.rlim_cur = rl.rlim_max = (rlim_t) config->max_process_number;
             if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
-                EXIT_WITH_FATAL_ERROR(ERROR_SET_RLIMIT, LOG_LEVEL_FATAL, "limit the process number error");
+                EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "limit the process number error");
             }
         }
 
@@ -139,7 +139,7 @@ void execute(const struct execute_config *config, struct execute_result *result)
             struct rlimit rl;
             rl.rlim_cur = rl.rlim_max = (rlim_t) config->max_output_size;
             if (setrlimit(RLIMIT_FSIZE, &rl) != 0) {
-                EXIT_WITH_FATAL_ERROR(ERROR_SET_RLIMIT, LOG_LEVEL_FATAL, "limit the output size");
+                EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "limit the output size");
             }
         }
 
@@ -147,11 +147,11 @@ void execute(const struct execute_config *config, struct execute_result *result)
         if (config->input_path != NULL) {
             FILE *input_file = fopen(config->input_path, "r");
             if (input_file == NULL) {
-                EXIT_WITH_FATAL_ERROR(ERROR_FILE_OPEN, LOG_LEVEL_FATAL, "can not open the input file");
+                EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "can not open the input file");
             }
 
             if (dup2(fileno(input_file), fileno(stdin)) == -1) {
-                EXIT_WITH_FATAL_ERROR(ERROR_FILE_DUP2, LOG_LEVEL_FATAL, "can not redirect the input file");
+                EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "can not redirect the input file");
             }
         }
 
@@ -159,28 +159,27 @@ void execute(const struct execute_config *config, struct execute_result *result)
         if (config->output_path != NULL) {
             FILE *output_file = fopen(config->output_path, "w");
             if (output_file == NULL) {
-                EXIT_WITH_FATAL_ERROR(ERROR_FILE_OPEN, LOG_LEVEL_FATAL, "can not open the output file");
+                EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "can not open the output file");
             }
 
             if (dup2(fileno(output_file), fileno(stdout)) == -1) {
-                EXIT_WITH_FATAL_ERROR(ERROR_FILE_DUP2, LOG_LEVEL_FATAL, "can not redirect the stdout");
+                EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "can not redirect the stdout");
             }
         }
 
         // change user
         if (setuid(config->uid) != 0) {
-            EXIT_WITH_FATAL_ERROR(ERROR_SET_UID, LOG_LEVEL_FATAL, "set uid failed");
+            EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "set uid failed");
         }
-
 
         // change group
         if (setgid(config->gid) != 0) {
-            EXIT_WITH_FATAL_ERROR(ERROR_SET_GID, LOG_LEVEL_FATAL, "set gid failed");
+            EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "set gid failed");
         }
 
         // load and release the seccomp filter
         if (seccomp_load(ctx) != 0) {
-            EXIT_WITH_FATAL_ERROR(ERROR_SECCOMP_LOAD, LOG_LEVEL_FATAL, "load seccomp filter failed");
+            EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "load seccomp filter failed");
         }
         seccomp_release(ctx);
 
@@ -198,28 +197,46 @@ void execute(const struct execute_config *config, struct execute_result *result)
             log_error("execute.c", config->log_path, "can not get the result of child process and can not kill it",
                       "a");
             result->message = "can not get the result of child process and can not kill it";
+            return;
         }
 
         int child_exit_status = WIFEXITED(status);
 
-        result->signal = WTERMSIG(status);
-        result->memory = resources.ru_maxrss;
+
+        result->signal = SUCCESS_PROCEED_SIGNAL;
+
+        if (WIFSIGNALED(status) != 0) {
+            result->signal = WTERMSIG(status);
+        }
+
+        result->used_memory = resources.ru_maxrss;
         result->used_time = resources.ru_utime.tv_sec * 1000 + resources.ru_utime.tv_usec / 1000;
 
-        if (child_exit_status) {
-            int child_return_status = WEXITSTATUS(status);
-            printf("exit code : %d\n", child_return_status);
-
-
-            if (child_return_status == SUCCESS_COMPLETE) {
-                result->status = SUCCESS_EXECUTE;
-                result->message = "successful execute";
-            } else {
-
-            }
-        } else {
+        if (result->signal == SYSTEM_ERROR_SIGNAL) {
             result->status = SYSTEM_ERROR;
             result->message = "system error";
+        } else if (child_exit_status == 0) {
+            int child_exit_code = WEXITSTATUS(status);
+
+            result->status = RUNTIME_ERROR;
+            result->message = "runtime error";
+
+            if (result->signal == SIGXFSZ) {
+                result->status = EXCEED_OUTPUT_SIZE_LIMIT;
+                result->message = "exceed output size limit";
+            }
+            printf("time used: %ldms\n", result->used_time);
+            printf("memory used: %ldkb\n", result->used_memory);
+            printf("exit code: %d\n", child_exit_code);
+            printf("signal: %d\n", result->signal);
+
+        } else {
+            result->status = SUCCESS_EXECUTE;
+            result->message = "successful execute";
+
+            printf("time used: %ldms\n", result->used_time);
+            printf("memory used: %ldkb\n", result->used_memory);
+            printf("signal: %d\n", result->signal);
         }
     }
 }
