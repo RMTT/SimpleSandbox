@@ -110,7 +110,8 @@ void execute(const struct execute_config *config, struct execute_result *result)
         // limit the cpu time
         if (config->max_cpu_time != UNLIMIT) {
             struct rlimit rl;
-            rl.rlim_cur = rl.rlim_max = (rlim_t) config->max_cpu_time;
+            rl.rlim_cur = (rlim_t) config->max_cpu_time;
+            rl.rlim_max = (rlim_t) (config->max_cpu_time + (rlim_t) 1);
             if (setrlimit(RLIMIT_CPU, &rl) != 0) {
                 EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "limit the cpu time failed");
             }
@@ -224,18 +225,23 @@ void execute(const struct execute_config *config, struct execute_result *result)
             if (result->signal == SIGXFSZ) {
                 result->status = EXCEED_OUTPUT_SIZE_LIMIT;
                 result->message = "exceed output size limit";
+            } else if (result->signal == SIGXCPU) {
+                result->status = EXCEED_CPU_TIME_LIMIT;
+                result->message = "exceed cpu time limit";
             }
-            printf("time used: %ldms\n", result->used_time);
-            printf("memory used: %ldkb\n", result->used_memory);
-            printf("exit code: %d\n", child_exit_code);
-            printf("signal: %d\n", result->signal);
 
+            printf("time used: %ld ms\n", result->used_time);
+            printf("memory used: %ld kb\n", result->used_memory);
+            printf("exit code: %d\n", child_exit_code);
+            printf("used stack size: %ld kb\n", resources.ru_isrss);
+            printf("signal: %d\n", result->signal);
         } else {
             result->status = SUCCESS_EXECUTE;
             result->message = "successful execute";
 
-            printf("time used: %ldms\n", result->used_time);
-            printf("memory used: %ldkb\n", result->used_memory);
+            printf("time used: %ld ms\n", result->used_time);
+            printf("memory used: %ld kb\n", result->used_memory);
+            printf("used stack size: %ld kb\n", resources.ru_isrss);
             printf("signal: %d\n", result->signal);
         }
     }
