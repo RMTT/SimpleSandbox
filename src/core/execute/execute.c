@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sys/resource.h>
 #include <wait.h>
+#include <errno.h>
 #include "user_authority.h"
 
 int init_execute_seccomp_filter(scmp_filter_ctx *ctx) {
@@ -184,7 +185,11 @@ void execute(const struct execute_config *config, struct execute_result *result)
         }
         seccomp_release(ctx);
 
-        execve(config->exec_path, config->argv, config->envp);
+        int res = execve(config->exec_path, config->argv, config->envp);
+
+        if (res == -1) {
+            EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "execute failed");
+        }
 
         exit(SUCCESS_COMPLETE);
     } else {
@@ -192,7 +197,7 @@ void execute(const struct execute_config *config, struct execute_result *result)
         int status;
         struct rusage resources;
 
-        if (wait4(child, &status, WSTOPPED, &resources) == -1) {
+        if (~wait4(child, &status, WSTOPPED, &resources)) {
             kill(child, SIGKILL);
             result->status = ERROR_KILL_PROCESS;
             log_error("execute.c", config->log_path, "can not get the result of child process and can not kill it",

@@ -49,7 +49,7 @@ struct execute_config {
     char *envp[MAX_ENV_NUM];
 };
 
-#define UNLIMIT 0
+#define UNLIMIT RLIM_INFINITY
 
 /**
  * the struct to describe the execute result
