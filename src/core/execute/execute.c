@@ -169,15 +169,6 @@ void execute(const struct execute_config *config, struct execute_result *result)
             }
         }
 
-        // change user
-        if (setuid(config->uid) != 0) {
-            EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "set uid failed");
-        }
-
-        // change group
-        if (setgid(config->gid) != 0) {
-            EXIT_WITH_FATAL_ERROR(LOG_LEVEL_FATAL, "set gid failed");
-        }
 
         // load and release the seccomp filter
         if (seccomp_load(ctx) != 0) {

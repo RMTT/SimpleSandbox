@@ -34,8 +34,6 @@
  * @param log_path the log file path
  */
 struct execute_config {
-    __uid_t uid;
-    __gid_t gid;
     int max_cpu_time;
     long max_memory;
     long max_stack;

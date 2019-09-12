@@ -9,6 +9,7 @@
 #include <stdbool.h>
 
 #define MAX_COMPILE_ARGS 256
+#define MAX_MESSAGE_LEN 256
 
 /**
  * this function will set the common filter to compile environment
@@ -33,12 +34,34 @@ struct compile_result {
  * @param tmp_file the path of tmp file,tmp file used to save the output of compiler
  * @param argv the arguments of compile*/
 struct compile_config {
-    __uid_t uid;
+    short arg_count;
     char *compiler_path;
     char *log_file;
     char *tmp_file;
     char *argv[MAX_COMPILE_ARGS];
 };
+
+/**
+ * construct the struct compile_config
+ * @param ccfg the pointer to pointer of original compile_config
+ * @param compiler_path point to compiler
+ * @param log_path point to log file
+ * @param binary_path point to binary file
+ */
+extern void
+compile_init(struct compile_config **ccfg, const char *compiler_path, const char *log_path, const char *binary_path);
+
+/**
+ * init the struct compile_result
+ * @param cres  the pointer to pointer of original compile_result
+ */
+extern void compile_result_init(struct compile_result **cres);
+/**
+ * Add argument to compiler
+ * @param ccfg the pointer to compile_config
+ * @param arg the argument will be added
+ */
+extern void compile_add_argv(struct compile_config *ccfg, const char *arg);
 
 /**
  * compile the target file

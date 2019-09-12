@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(imcoder-judger)
 
+set(CMAKE_C_STANDARD 11)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/lib)
 
