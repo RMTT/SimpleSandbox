@@ -60,7 +60,7 @@ void compile(const struct compile_config *config, struct compile_result *result)
         FILE *tmp_file = fopen(config->tmp_file, "w");
 
         if (dup2(fileno(tmp_file), fileno(stderr)) == -1)
-           exit_with_error(ERROR_FILE_DUP2, LOG_LEVEL_FATAL, "can not redirect to the tmp file", config->log_file,
+            exit_with_error(ERROR_FILE_DUP2, LOG_LEVEL_FATAL, "can not redirect to the tmp file", config->log_file,
                             "compile.c");
 
         execvp(config->compiler_path, config->argv);
@@ -118,7 +118,7 @@ void compile_add_argv(struct compile_config *ccfg, const char *arg) {
 
 void compile_result_init(struct compile_result **cres) {
     *cres = malloc(sizeof(struct compile_result));
-    (*cres)->message = malloc(sizeof(char) * MAX_MESSAGE_LEN);
+    (*cres)->message = malloc(MAX_MESSAGE_LEN);
 }
 
 

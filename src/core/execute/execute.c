@@ -35,15 +35,6 @@ void init_result(struct execute_result *result) {
 }
 
 void execute(const struct execute_config *config, struct execute_result *result) {
-    if (__require_root_authority() != 0) {
-        result->status = ERROR_NOT_ROOT;
-        log_fatal("compile.c", config->log_path, "please use the root user to execute the program", "a");
-        return;
-    }
-
-    init_result(result);
-
-
     scmp_filter_ctx ctx;
     int rs = init_execute_seccomp_filter(&ctx);
     if (rs == -1) {
@@ -188,12 +179,12 @@ void execute(const struct execute_config *config, struct execute_result *result)
         int status;
         struct rusage resources;
 
-        if (~wait4(child, &status, WSTOPPED, &resources)) {
+        if (wait4(child, &status, WSTOPPED, &resources) == -1) {
             kill(child, SIGKILL);
             result->status = ERROR_KILL_PROCESS;
-            log_error("execute.c", config->log_path, "can not get the result of child process and can not kill it",
+            log_error("execute.c", config->log_path, "can not get the result of child process,also can not kill it",
                       "a");
-            result->message = "can not get the result of child process and can not kill it";
+            result->message = "can not get the result of child process,also kill it";
             return;
         }
 
@@ -225,20 +216,65 @@ void execute(const struct execute_config *config, struct execute_result *result)
                 result->status = EXCEED_CPU_TIME_LIMIT;
                 result->message = "exceed cpu time limit";
             }
-
-            printf("time used: %ld ms\n", result->used_time);
-            printf("memory used: %ld kb\n", result->used_memory);
-            printf("exit code: %d\n", child_exit_code);
-            printf("used stack size: %ld kb\n", resources.ru_isrss);
-            printf("signal: %d\n", result->signal);
         } else {
             result->status = SUCCESS_EXECUTE;
             result->message = "successful execute";
-
-            printf("time used: %ld ms\n", result->used_time);
-            printf("memory used: %ld kb\n", result->used_memory);
-            printf("used stack size: %ld kb\n", resources.ru_isrss);
-            printf("signal: %d\n", result->signal);
         }
     }
 }
+
+void
+execute_init(struct execute_config **ecfg, int max_cpu_time, long max_memory, long max_stack, int max_processor_number,
+             int max_output_size) {
+    *ecfg = malloc(sizeof(struct execute_config));
+
+    (*ecfg)->max_cpu_time = max_cpu_time;
+    (*ecfg)->max_memory = max_memory;
+    (*ecfg)->max_stack = max_stack;
+    (*ecfg)->max_process_number = max_processor_number;
+    (*ecfg)->max_output_size = max_output_size;
+
+    (*ecfg)->arg_count = 0;
+    (*ecfg)->env_count = 0;
+}
+
+void execute_set_exec(struct execute_config *ecfg, const char *arg) {
+    ecfg->exec_path = malloc(strlen(arg));
+    memcpy(ecfg->exec_path, arg, strlen(arg));
+}
+
+void execute_set_input(struct execute_config *ecfg, const char *arg) {
+    ecfg->input_path = malloc(strlen(arg));
+    memcpy(ecfg->input_path, arg, strlen(arg));
+}
+
+void execute_set_output(struct execute_config *ecfg, const char *arg) {
+    ecfg->output_path = malloc(strlen(arg));
+    memcpy(ecfg->output_path, arg, strlen(arg));
+}
+
+void execute_set_log(struct execute_config *ecfg, const char *arg) {
+    ecfg->log_path = malloc(strlen(arg));
+    memcpy(ecfg->log_path, arg, strlen(arg));
+}
+
+void execute_add_arg(struct execute_config *ecfg, const char *arg) {
+    ecfg->argv[ecfg->arg_count] = malloc(strlen(arg));
+    memcpy(ecfg->argv[ecfg->arg_count], arg, strlen(arg));
+
+    ++ecfg->arg_count;
+}
+
+void execute_add_env(struct execute_config *ecfg, const char *arg) {
+    ecfg->envp[ecfg->env_count] = malloc(strlen(arg));
+    memcpy(ecfg->envp[ecfg->env_count], arg, strlen(arg));
+
+    ++ecfg->env_count;
+}
+
+void execute_result_init(struct execute_result **eres) {
+    *eres = malloc(sizeof(struct execute_result));
+
+    (*eres)->message = malloc(MAX_MESSAGE_LEN);
+}
+

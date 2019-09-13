@@ -12,6 +12,8 @@
 #define MAX_ARG_NUM 256
 #define MAX_ENV_NUM 256
 
+#define MAX_MESSAGE_LEN 256
+
 #define SUCCESS_EXECUTE 201
 #define FAIL_EXECUTE 202
 #define EXCEED_MEMORY_LIMIT 203
@@ -38,6 +40,8 @@ struct execute_config {
     long max_memory;
     long max_stack;
     int max_process_number;
+    int arg_count;
+    int env_count;
     long max_output_size;
     char *exec_path;
     char *input_path;
@@ -46,6 +50,23 @@ struct execute_config {
     char *argv[MAX_ARG_NUM];
     char *envp[MAX_ENV_NUM];
 };
+
+extern void
+execute_init(struct execute_config **ecfg, int max_cpu_time, long max_memory, long max_stack, int max_processor_number,
+             int max_output_size);
+
+extern void execute_set_exec(struct execute_config *ecfg, const char *arg);
+
+extern void execute_set_input(struct execute_config *ecfg, const char *arg);
+
+extern void execute_set_output(struct execute_config *ecfg, const char *arg);
+
+extern void execute_set_log(struct execute_config *ecfg, const char *arg);
+
+extern void execute_add_arg(struct execute_config *ecfg, const char *arg);
+
+extern void execute_add_env(struct execute_config *ecfg, const char *arg);
+
 
 #define UNLIMIT RLIM_INFINITY
 
@@ -61,6 +82,8 @@ struct execute_result {
     long int used_memory;
     char *message;
 };
+
+extern void execute_result_init(struct execute_result **eres);
 
 /**
  * initialize the execute seccomp filter
